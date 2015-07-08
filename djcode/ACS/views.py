@@ -8,11 +8,11 @@ from django.contrib import staticfiles
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext 
 from django.views.decorators.csrf import csrf_exempt
-from course.models import Application as apply
+from models import Application as apply
 from IMS.models import Course_info, Class_info
 from django.contrib.auth.models import User
 from django.contrib import auth
-from course.AutoCourseArrangement import AutoCourseArrange
+from AutoCourseArrangement import AutoCourseArrange
 from django.http import HttpResponseRedirect
 import json
 
@@ -22,9 +22,9 @@ def Logout(request):
 	return HttpResponseRedirect('..')
 
 @csrf_exempt
-def TeachingResourse(request, offset):#¹ÜÀí½ÌÊÒ
+def TeachingResourse(request, offset):#ç®¡ç†æ•™å®¤
 	if not request.user.is_staff:
-		return HttpResponseRedirect('../mca')#·Ç·¨url
+		return HttpResponseRedirect('../mca')#éæ³•url
 	
 	del_r = ''
 	add_r = ''
@@ -36,7 +36,7 @@ def TeachingResourse(request, offset):#¹ÜÀí½ÌÊÒ
 	else:
 		f = 0
 	if f:
-		if offset == "add" :#²åÈë
+		if offset == "add" :#æ’å…¥
 			
 			try:
 				p = classroom.objects.create( name = f["cr_Name"], type = f["cr_Type"], capacity = f["cr_capa"], campus = f["cr_camp"])
@@ -45,7 +45,7 @@ def TeachingResourse(request, offset):#¹ÜÀí½ÌÊÒ
 				add_r = 'add seccess'
 			except StandardError, e:
 				add_r = 'add fail'
-		elif offset == "del" :#É¾³ı
+		elif offset == "del" :#åˆ é™¤
 			
 			try:
 				p = classroom.objects.get(id = f["cr_ID"])
@@ -53,7 +53,7 @@ def TeachingResourse(request, offset):#¹ÜÀí½ÌÊÒ
 				del_r = 'delete seccess'
 			except StandardError, e:
 				del_r = 'delete fail'
-		elif offset == "mod":#¸üĞÂ
+		elif offset == "mod":#æ›´æ–°
 			
 			try:
 				p = classroom.objects.filter(id = f["cr_ID"])
@@ -62,8 +62,8 @@ def TeachingResourse(request, offset):#¹ÜÀí½ÌÊÒ
 			except StandardError, e:
 				mod_r = 'modify fail'
 		else:
-			return HttpResponse("error")#ÆäËû
-	return render_to_response('cr.html', {'admin': admin, 'add_result':add_r, 'del_result':del_r, 'mod_result':mod_r})
+			return HttpResponse("error")#å…¶ä»–
+	return render_to_response(get_template('cr.html'), {'admin': admin, 'add_result':add_r, 'del_result':del_r, 'mod_result':mod_r})
 
 @csrf_exempt
 def CourseArrange(request, offset):
@@ -71,7 +71,7 @@ def CourseArrange(request, offset):
 		return render_to_response('mca.html')
 	res = ''
 	admin = request.user.is_staff
-	if offset == 'automatic':#°´ÏÂ°´Å¥¿ªÊ¼µ÷¿Î
+	if offset == 'automatic':#æŒ‰ä¸‹æŒ‰é’®å¼€å§‹è°ƒè¯¾
 		res = 'Done'
 		auto = AutoCourseArrange()
 		auto.run()
@@ -86,24 +86,25 @@ def CourseApply(request, offset):
 	
 	admin = request.user.is_staff
 	try:
-		ApplyList = apply.objects.filter(teacherID=request.user.username)#»ñµÃ½ÌÊ¦µÄ¿Î³Ì±íĞÅÏ¢
+		ApplyList = apply.objects.filter(teacherID=request.user.username)#è·å¾—æ•™å¸ˆçš„è¯¾ç¨‹è¡¨ä¿¡æ¯
+		print ApplyList
 	except StandardError, e:
 		f = 0;
 	for i in ApplyList:
-		i.classTime = timeadj(i.classTime)#½âÂë
+		i.classTime = timeadj(i.classTime)#è§£ç 
 		
 	if request.method == 'POST':
 		f = request.POST
 	else:
 		f = 0
 	if f:
-		if offset == "add_cl" :#²åÈë
+		if offset == "add_cl" :#æ’å…¥
 			w1 = f["cl_Time1"]
 			t1 = f["cl_Hour1"]
 			w2 = f["cl_Time2"]
 			t2 = f["cl_Hour2"]
 			r = ''
-			#´¦ÀíÊ±¼ä
+			#å¤„ç†æ—¶é—´
 			flag = 1
 			t1 = dec_time(int(t1))
 
@@ -131,7 +132,7 @@ def CourseApply(request, offset):
 			except StandardError, e:
 				add_r = 'add fail'
 	
-		else:	#É¾³ı
+		else:	#åˆ é™¤
 			try:
 				p = apply.objects.get(id = f["cl_ID"])
 				p.delete()
@@ -143,28 +144,28 @@ def CourseApply(request, offset):
 	return render_to_response('mca.html', {'admin': admin, 'add_result':add_r, 'del_result':del_r, 'applylist':ApplyList})
 
 @csrf_exempt
-def Index(request, offset):#µÇÂ¼²¿·Ö
+def Index(request, offset):#ç™»å½•éƒ¨åˆ†
 	if offset == 'teacher':
 		user = auth.authenticate(username='t', password='')
 		#u = 'mca.html'
-		u = '/mca/'
+		u = '/ACS/mca/'
+		#auth.login(request, user)
+		#admin = user.is_staff
+		return HttpResponseRedirect(u)
 	elif offset == 'admin':
 		user = auth.authenticate(username='a', password='')
 		#u = 'cr.html'
-		u = '/cr/'
+		u = '/ACS/cr/'
+		#auth.login(request, user)
+		#admin = user.is_staff
+		return HttpResponseRedirect(u)
 	else:
 		user = None
 		u = 'main.html'
-	if user != None:
-		auth.login(request, user)
-		admin = user.is_staff
-		return HttpResponseRedirect(u)
-
-	else:
-		return render_to_response(u)
+		return render_to_response('main.html')
 	
 @csrf_exempt
-def CourseSearch(request):#¿Î³Ì²éÑ¯
+def CourseSearch(request):#è¯¾ç¨‹æŸ¥è¯¢
 	try:
 		CourseList = Class_info.objects.filter(teacher=request.user.username)
 		CourseTable = ListToTable(CourseList)
@@ -201,7 +202,7 @@ def CourseOperation(request, offset):
 	else:
 		f = 0
 	
-	if offset == 'add_cz':#Ôö¼Ó¿Î³Ì
+	if offset == 'add_cz':#å¢åŠ è¯¾ç¨‹
 		try:
 			p = Course_info.objects.create(course_id = f["cz_ID"], 
 										name = f["cz_Name"], 
@@ -221,12 +222,12 @@ def CourseOperation(request, offset):
 			del_r = 'delete seccess'
 		except StandardError, e:
 			del_r = 'delete fail'
-	elif offset == 'add_cl':#Ôö¼Ó½ÌÑ§°à
+	elif offset == 'add_cl':#å¢åŠ æ•™å­¦ç­
 		w1 = f["cl_Time1"]
 		t1 = f["cl_Hour1"]
 		w2 = f["cl_Time2"]
 		t2 = f["cl_Hour2"]
-		#Ê±¼ä´¦Àí
+		#æ—¶é—´å¤„ç†
 		t1 = dec_time(int(t1))
 		
 		r = []
@@ -241,15 +242,15 @@ def CourseOperation(request, offset):
 		teachertime = 0
 		roomtime = 0
 		over= 0
-		#¼ì²éÍ¬Ò»ÀÏÊ¦Í¬Ò»Ê±¼ä
+		#æ£€æŸ¥åŒä¸€è€å¸ˆåŒä¸€æ—¶é—´
 		a = Class_info.objects.filter(teacher = f["teac_ID"], classTime = t)#
 		teachertime = a and 1 or 0
-		#¼ì²éÏàÍ¬½ÌÊÒÏàÍ¬Ê±¼ä
+		#æ£€æŸ¥ç›¸åŒæ•™å®¤ç›¸åŒæ—¶é—´
 		a = Class_info.objects.filter(classroom = f["cl_room"], classTime = t)
 		roomtime = a and 1 or 0
 		a = classroom.objects.filter(name = f["cl_room"])
 		over = a[0].capacity
-		#¼ì²éÈİÁ¿
+		#æ£€æŸ¥å®¹é‡
 		if((not a) or a[0].capacity < f["cl_Capa"] or f["cl_Capa"] < 0):
 			add_2 = False
 		elif 	(teachertime  + roomtime  >= 1):
@@ -275,7 +276,7 @@ def CourseOperation(request, offset):
 	print(add_2)
 	return render_to_response('cp.html', {'admin': admin, 'add1_result':add_r, 'del1_result':del_r, 'add2_result':add_2, 'del2_result':del_2,})
 
-def dec_time(t):#¿Î³ÌÊ±¼ä
+def dec_time(t):#è¯¾ç¨‹æ—¶é—´
 	if t == 1:
 		return [1,2]
 	elif  t == 2:
