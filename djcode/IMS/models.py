@@ -143,9 +143,9 @@ class Class_info(models.Model):
     teacher = models.ForeignKey(Faculty_user)
     time = models.CharField(max_length=20) #by CCS: type integer to char
     room = models.CharField(max_length=20)
-    examdate = models.CharField(max_length=10)
-    examtime = models.CharField(max_length=10)
-    examroom = models.CharField(max_length=20)
+    examdate = models.CharField(max_length=10, default="0000000000")
+    examtime = models.CharField(max_length=10, default="0000000000")
+    examroom = models.CharField(max_length=20, default="00000000000000000000")
     capacity = models.IntegerField(default=0)
     semester = models.IntegerField(default=0) #开课学期
     remain = models.IntegerField(default=0) #选课剩余容量

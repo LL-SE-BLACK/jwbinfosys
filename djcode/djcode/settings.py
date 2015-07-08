@@ -41,6 +41,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'IMS',
     'dbtest',
+    'teacher',
+    'student',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -60,7 +62,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(os.path.dirname(__file__), 'templates').replace('\\','/'),
-                 os.path.join(os.path.dirname(__file__), '../templates').replace('\\','/'),
+                 os.path.join(os.path.dirname(__file__), '../teacher/template').replace('\\','/'),
                  ],
         'APP_DIRS': True,
         'OPTIONS': {
