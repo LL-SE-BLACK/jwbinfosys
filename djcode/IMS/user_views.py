@@ -140,6 +140,7 @@ def getSearchResult(searchType, searchTerm, userCollege, userType):
 
 @login_required
 def facultyAdd(request):
+    group = Group.objects.get(name='teacher')
     errors = []
     errorImport = []
     existed = []
@@ -175,6 +176,7 @@ def facultyAdd(request):
                 if state == 'YEAH'.encode('utf-8'):
                     dbQuery.save()
                     user = User.objects.create_user(dbQuery.id, dbQuery.id+"@zju.edu.cn", "123456")
+                    user.groups.add(group)
                 else:
                     errorExist = True
                     returnListItem = fileTerms[0 + LEN_OF_FACULTY_TABLE * x : LEN_OF_FACULTY_TABLE + LEN_OF_FACULTY_TABLE * x];
@@ -208,6 +210,7 @@ def facultyAdd(request):
                 )
                 dbQuery.save()
                 user = User.objects.create_user(dbQuery.id, dbQuery.id+"@zju.edu.cn", "123456")
+                user.groups.add(group)
                 if dbQuery.isSpecial:
                     if info['canManageCourses']:
                         perm = Permission.objects.get(codename='course_manage')
@@ -335,6 +338,7 @@ def facultyModify(request):
 
 @login_required
 def studentAdd(request):
+    group = Group.objects.get(name='student')
     errors = []
     errorImport = []
     addIsDone = False
@@ -369,6 +373,7 @@ def studentAdd(request):
                 state = importStudentCheck(fileTerms[0 + LEN_OF_STUDENT_TABLE * x : LEN_OF_STUDENT_TABLE + LEN_OF_STUDENT_TABLE * x])
                 if state == 'YEAH'.encode('utf-8'):
                     user = User.objects.create_user(dbQuery.id, dbQuery.id+"@zju.edu.cn", "123456")
+                    user.groups.add(group)
                     dbQuery.save()
                 else:
                     errorExist = True
@@ -404,6 +409,7 @@ def studentAdd(request):
                 )
                 dbQuery.save()
                 user = User.objects.create_user(dbQuery.id, dbQuery.id+"@zju.edu.cn", "123456")
+                user.groups.add(group)
                 if dbQuery.isSpecial:
                     if info['canManageCourses']:
                         perm = Permission.objects.get(codename='course_manage')
@@ -534,6 +540,7 @@ def studentModify(request):
 @login_required
 @permission_required('IMS.admin_manage')
 def adminAdd(request):
+    group = Group.objects.get(name='admin')
     errors = []
     errorImport = []
     existed = []
@@ -556,6 +563,7 @@ def adminAdd(request):
                 if state == 'YEAH'.encode('utf-8'):
                     dbQuery.save()
                     user = User.objects.create_user(dbQuery.id, dbQuery.id+"@zju.edu.cn", "123456")
+                    user.groups.add(group)
                 else:
                     errorExist = True
                     returnListItem = fileTerms[0 + LEN_OF_ADMIN_TABLE * x : LEN_OF_ADMIN_TABLE + LEN_OF_ADMIN_TABLE * x];
@@ -584,6 +592,7 @@ def adminAdd(request):
                 )
                 dbQuery.save()
                 user = User.objects.create_user(dbQuery.id, dbQuery.id+"@zju.edu.cn", "123456")
+                user.groups.add(group)
                 perm1 = Permission.objects.get(codename='student_manage')
                 perm2 = Permission.objects.get(codename='faculty_manage')
                 perm3 = Permission.objects.get(codename='course_manage')

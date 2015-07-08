@@ -22,7 +22,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import user_passes_test
-from IMS.models import Student_user, Faculty_user, Course_info, Class_info, Class_table
+from IMS.models import *
 ###
 # from dbtest.xls_utils import get_demo_xlsx
 

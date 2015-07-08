@@ -1,5 +1,5 @@
+# -*- coding: utf-8 -*-
 __author__ = 'skar'
-
 from IMS.models import *
 
 class TempTable(models.Model):
