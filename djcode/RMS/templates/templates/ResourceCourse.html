@@ -46,9 +46,9 @@
                         <br>
                         {% for course in course_list %}
                             {% if course.course_id == course_id %}
-                            <li><a href="ResourceCourse.html?course_id={{course.course_id}}"><strong>{{course.course_id}}</strong></a></li>
+                            <li><a href="ResourceCourse.html?course_id={{course.course_id.pk}}"><strong>{{course.course_id.name}}</strong></a></li>
                             {% else %}
-                            <li><a href="ResourceCourse.html?course_id={{course.course_id}}">{{course.course_id}}</a></li>
+                            <li><a href="ResourceCourse.html?course_id={{course.course_id.pk}}">{{course.course_id.name}}</a></li>
                             {% endif %}
                         {% endfor %}
                         <br>

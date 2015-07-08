@@ -52,9 +52,9 @@ def getcourselist(request):
     if request.COOKIES['type'] == 'student':
         return Class_table.objects.filter(student_id=request.COOKIES['uid'])
     elif request.COOKIES['type'] == 'teacher':
-        return Class_info.objects.filter(Faculty_user=request.COOKIES['uid'])
+        return Class_info.objects.filter(teacher_id=request.COOKIES['uid'])
     else:
-        return Class_info.objects.all()
+        return Class_info.objects.filter()
 
 def resource(request):
     print 'sb'
@@ -296,7 +296,7 @@ def resource_upload(request):
     course_list = getcourselist(request)
     try:
         f = request.FILES['file']
-        address = r'resource/'+f.name
+        address = r'RMS/resource/'+f.name
         print address
         f = handle_uploaded_file(f,address)
         print address
