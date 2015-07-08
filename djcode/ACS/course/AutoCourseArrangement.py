@@ -2,7 +2,8 @@ import json
 import time
 import itertools
 from django.db import models
-from models import Faculty_user, classroom, Application, Class_info
+from IMS.models import Faculty_user, Class_info
+from models import classroom, Application
 
 class ClassroomSchedule:
 	def __init__(self):

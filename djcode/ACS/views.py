@@ -8,7 +8,8 @@ from django.contrib import staticfiles
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext 
 from django.views.decorators.csrf import csrf_exempt
-from course.models import classroom, Application as apply, Course_info, Class_info
+from course.models import Application as apply
+from IMS.models import Course_info, Class_info
 from django.contrib.auth.models import User
 from django.contrib import auth
 from course.AutoCourseArrangement import AutoCourseArrange

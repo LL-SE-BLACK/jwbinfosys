@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'IMS',
     'dbtest',
+	'ACS',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -61,6 +62,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(os.path.dirname(__file__), 'templates').replace('\\','/'),
                  os.path.join(os.path.dirname(__file__), '../templates').replace('\\','/'),
+                 os.path.join(os.path.dirname(__file__), '../ACS/templates').replace('\\','/'),
                  ],
         'APP_DIRS': True,
         'OPTIONS': {
