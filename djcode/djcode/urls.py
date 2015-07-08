@@ -24,6 +24,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns #by SMS
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^ims/', include('IMS.urls')),
+    url(r'^rms/', include('RMS.urls')),
     url(r'^SM/', include('dbtest.urls')), #by SMS
     url(r'^$', startup),
 ]

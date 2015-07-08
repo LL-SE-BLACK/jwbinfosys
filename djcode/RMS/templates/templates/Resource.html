@@ -44,7 +44,7 @@
                             <br>
                             <br>
                             {% for course in course_list %}
-                            <li><a href="ResourceCourse.html?course_id={{course.course_id}}">{{course.course_id}}</a></li>
+                            <li><a href="ResourceCourse.html?course_id={{course.course_id.id}}">{{course.course_id.name}}</a></li>
                             {% endfor %}
                             <br>
                             <br>

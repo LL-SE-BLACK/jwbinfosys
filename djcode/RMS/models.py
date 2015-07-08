@@ -57,12 +57,12 @@ class Notice(models.Model):
     content = models.CharField(max_length = 100)
     date = models.DateTimeField(default = datetime.datetime.now())
 
-class course(models.Model):
-    num = models.CharField(max_length = 8, primary_key = True)
-    student_id = models.CharField(max_length = 8)
-    course_id = models.CharField(max_length = 8)
-    teacher_id = models.CharField(max_length = 8)
-    manager_id = models.CharField(max_length = 8)
+# class course(models.Model):
+#     num = models.CharField(max_length = 8, primary_key = True)
+#     student_id = models.CharField(max_length = 8)
+#     course_id = models.CharField(max_length = 8)
+#     teacher_id = models.CharField(max_length = 8)
+#     manager_id = models.CharField(max_length = 8)
 
 class Ex(models.Model):
     student_id = models.CharField(max_length = 8, default = '1')
