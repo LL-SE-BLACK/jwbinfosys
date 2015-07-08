@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^ims/', include('IMS.urls')),
     url(r'^SM/', include('dbtest.urls')), #by SMS
     url(r'^$', startup),
+	url(r'^ACS/', include('ACS.urls')), #by ACS
 ]
 
 urlpatterns += staticfiles_urlpatterns() #by SMS
