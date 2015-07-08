@@ -41,8 +41,8 @@ def SelectQuestion(ChL,ChH,Type_i,Num,Diff,request):  # used to select question 
         mysum +=NumQ
 
         UserClassId = get_class(request).OnAuthClassId
-        courseInfo = Class_info.objects.get(class_id=UserClassId).course_id
-        courseId = courseInfo.course_id
+        courseInfo = Class_info.objects.get(class_id=UserClassId).id
+        courseId = courseInfo.id
         Q = Question.objects.filter(Chapter__in=range(ChL,ChH+1), Type__in=Type_i, Difficulty=i,CourseId=courseId)
         #SelectQue
         if len(Q)<NumQ:
@@ -547,7 +547,7 @@ def QuestionAddForm2(request):
     if not request.user.is_authenticated():
         return HttpResponseRedirect('/')
     if request.POST:
-        #course = # you need to get the course_id of the curerent user
+        #course = # you need to get the id of the curerent user
         form = request.POST
         score = form['Score']
         difficulty = form['Difficulty']

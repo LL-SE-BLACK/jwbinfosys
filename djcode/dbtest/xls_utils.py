@@ -89,12 +89,12 @@ def parse_xlsx(xlsx_filename):
     return xlsx_info
 
 import os
-def get_demo_xlsx(course_id):
+def get_demo_xlsx(id):
     wb = Workbook()
     ws = wb.active
     ws.title = 'score sheet 1'
 
-    student_info = class_info_query(course_id)
+    student_info = class_info_query(id)
 
 
     # Formatting
@@ -113,7 +113,7 @@ def get_demo_xlsx(course_id):
 
 
     # Filling the data.
-    ws['F3'] = course_id
+    ws['F3'] = id
 
     for row in student_info:
         # for row in range(5, 5 + 10):

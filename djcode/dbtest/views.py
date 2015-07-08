@@ -136,10 +136,10 @@ def b_student_query(request):
             tmp_gpa = (tmp_score - 60) / 10 + 1.5
             if tmp_gpa > 5:
                 tmp_gpa = 5
-        tmp_node = {'courseID': tmp_class.course_id.course_id,
-                    'courseName': tmp_class.course_id.name,
-                    'credit': tmp_class.course_id.credits,
-                    'semester': tmp_class.course_id.semester,
+        tmp_node = {'courseID': tmp_class.id.id,
+                    'courseName': tmp_class.id.name,
+                    'credit': tmp_class.id.credits,
+                    'semester': tmp_class.id.semester,
                     'score': tmp_score,
                     'gradePoint': tmp_gpa
                     }
@@ -291,9 +291,9 @@ def faculty_class_query(f_id, is_temp):
         tmp_node = {  # generate node for list
                       'classID': cla.class_id,
                       'classTime': cla.time,
-                      'courseID': cla.course_id.course_id,
-                      'courseName': cla.course_id.name,
-                      'credits': cla.course_id.credits
+                      'courseID': cla.id.id,
+                      'courseName': cla.id.name,
+                      'credits': cla.id.credits
                       }
         info_list.append(tmp_node)
     return info_list
@@ -383,7 +383,7 @@ def b_score_modification(c_id, s_id, score, reason):
     print(s.student_id)
     old_score = s.score
 
-    # chief_faculty = cla.course_id.chief_faculty  # generate a new message
+    # chief_faculty = cla.id.chief_faculty  # generate a new message
     # update_message = MessageTable.objects.create(from_faculty_id=from_fac,
     # 											 to_faculty_id=chief_faculty,
     # 											 student_id=stu, class_id=cla,
@@ -400,10 +400,10 @@ def b_score_modification(c_id, s_id, score, reason):
     top_msg_id += 1
     print('new msg id {}'.format(top_msg_id))
 
-    teacher_of_course = Class_info.objects.filter(course_id=cla.course_id)
-    print('teacher of the course {} is {}'.format(cla.course_id, len(teacher_of_course)))
+    teacher_of_course = Class_info.objects.filter(id=cla.id)
+    print('teacher of the course {} is {}'.format(cla.id, len(teacher_of_course)))
 
-    if count_faculty_of_course(cla.course_id) == 1:
+    if count_faculty_of_course(cla.id) == 1:
         # TODO: no verified
         # get this score and update and save it
         score_row = ScoreTable.objects.get(class_id=c_id, student_id=s_id)
@@ -465,7 +465,7 @@ def db_query_modify_info(faculty_id):
             tmp_status = 'pending'
         temp_node = {  # generate node
                        'messageID': rec.message_id,
-                       'className': rec.class_id.course_id.name,
+                       'className': rec.class_id.id.name,
                        'studentID': rec.student_id.id,
                        'studentName': rec.student_id.name,
                        'old_score': rec.old_score,
@@ -489,7 +489,7 @@ def db_query_modify_info(faculty_id):
             tmp_status = 'final_reject'
         temp_node = {
         'messageID': rec.message_id,
-        'className': rec.class_id.course_id.name,
+        'className': rec.class_id.id.name,
         'studentID': rec.student_id.id,
         'studentName': rec.student_id.name,
         'old_score': rec.old_score,
@@ -553,8 +553,8 @@ def b_sanction(request, msg_id, status):
         return HttpResponse(u'非法记录号')
 
 
-def count_faculty_of_course(course_id):
-    return len(Class_info.objects.filter(course_id=course_id))
+def count_faculty_of_course(id):
+    return len(Class_info.objects.filter(id=id))
 
 
 def check_msg_status(message_id):
@@ -578,9 +578,9 @@ def check_msg_status(message_id):
         elif row.status == -1:
             rejected_count += 1
 
-    course_id = msg_list.first().class_id.course_id
+    id = msg_list.first().class_id.id
 
-    faculty_cnt = count_faculty_of_course(course_id)
+    faculty_cnt = count_faculty_of_course(id)
 
     if (faculty_cnt < 3 and admitted_count >= faculty_cnt - 1) or (faculty_cnt >= 3 and admitted_count >= 2):
         # admit
@@ -659,7 +659,7 @@ def b_final_commit(request, c_id):
             else:
                 new_state = -1
             # should be update() not update_or_create, but right now the database is incomplete
-            Scheme_info.objects.update_or_create(course_id=rec.class_id.course_id, student_id=rec.student_id,
+            Scheme_info.objects.update_or_create(id=rec.class_id.id, student_id=rec.student_id,
                                                  state=new_state)
             print("state updated to " + str(new_state))
 
@@ -680,11 +680,11 @@ def db_scheme_info_query(s_id):
         tmp_node = {
         'studentID': cou.student_id.id,
         'studentName': cou.student_id.name,
-        'courseId': cou.course_id.course_id,
-        'courseName': cou.course_id.name,
-        'courseSemester': cou.course_id.semester,
-        'courseCollege': cou.course_id.college,
-        'credits': cou.course_id.credits,
+        'courseId': cou.id.id,
+        'courseName': cou.id.name,
+        'courseSemester': cou.id.semester,
+        'courseCollege': cou.id.college,
+        'credits': cou.id.credits,
         'state': cou.state
         }
         ret_list.append(tmp_node)
@@ -785,33 +785,33 @@ def download_xlsx(request, c_id):
 editing_class = []
 
 
-# def class_info_online_edit(course_id):
+# def class_info_online_edit(id):
 #     """
 #     get class score info for online editing
-#     :param course_id: course id
+#     :param id: course id
 #     :return: a list of dict with the following keys
 #     ('studentID', 'studentName', 'score') None for 'not able to edit'
 #     """
 #
 #     # check if the queried course is already being edited.
-#     if editing_class.index(course_id) is not None:
+#     if editing_class.index(id) is not None:
 #         return None
 #
-#     return class_info_query(course_id)
+#     return class_info_query(id)
 
-def class_info_online_edit(request, course_id):
+def class_info_online_edit(request, id):
     """
     get class score info for online editing
-    :param course_id: course id
+    :param id: course id
     :return: a list of dict with the following keys
     {studentID, studentName, score, gradePoint} None for 'not able to edit'
     """
 
     # check if the queried course is already being edited.
-    if editing_class.index(course_id) is not None:
+    if editing_class.index(id) is not None:
         return None
 
-    return db_temp_table_query(course_id)
+    return db_temp_table_query(id)
 
 
 def b_online_save(request, s_id, c_id):
@@ -821,19 +821,19 @@ def b_online_save(request, s_id, c_id):
     return HttpResponse('修改成功')
 
 
-def class_info_online_save(course_id, scores):
+def class_info_online_save(id, scores):
     """
     save online score info
-    :param course_id: the editing class id
+    :param id: the editing class id
     :param scores: scores after modification , is a dictionary with key 'studentID', 'score'
     :return: nothing
     """
 
     # remove the class from editing_class list
-    if editing_class.index(course_id) is not None:
-        editing_class.remove(course_id)
+    if editing_class.index(id) is not None:
+        editing_class.remove(id)
 
-    temp_table_update(course_id, scores)
+    temp_table_update(id, scores)
 
 
 def get_scheme_info(request):

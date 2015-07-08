@@ -37,7 +37,7 @@ def ViewClass(request,offset):
         ClassList = []
         for ClassName in ClassTable:
             ClassId = ClassName.class_id.class_id
-            CourseName = ClassName.class_id.course_id.name
+            CourseName = ClassName.class_id.id.name
             ClassList.append({'Name': CourseName+' '+ClassId,'URL':'/class_list/'+ClassId+'/'})
         return render_to_response('Choose_Class.html',{'ClassList':ClassList},context_instance=RequestContext(request))
     if request.method =='POST':

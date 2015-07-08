@@ -58,7 +58,7 @@ def isDigit(a):
             return False
 
 def importCheck(term, isAdmin, isFaculty, userCollege):
-    if Course_info.objects.filter(course_id = term[0]): #test duplicate add
+    if Course_info.objects.filter(id = term[0]): #test duplicate add
         return 'ALREADY EXIST'
     if isFaculty and (not userCollege == term[5]):
         return 'DIFF COLLEGE'
@@ -79,9 +79,9 @@ def importCheck(term, isAdmin, isFaculty, userCollege):
     return 'YEAH'
 
 def getSearchResult(searchType, searchTerm, isAdmin, isFaculty, userCollege):
-    if searchType == "course_id":
-        coursesTemp = Course_info.objects.filter(course_id = searchTerm)
-    if searchType == "course_name":
+    if searchType == "id":
+        coursesTemp = Course_info.objects.filter(id = searchTerm)
+    if searchType == "name":
         coursesTemp = Course_info.objects.filter(name__icontains = searchTerm)
     if searchType == "credits":
         coursesTemp = Course_info.objects.filter(credits = searchTerm)
@@ -143,7 +143,7 @@ def courseAdd(request):
             fileTerms = re.split(',', request.POST.get('file'))
             for x in xrange(0, len(fileTerms) / LEN_OF_COURSE_TABLE):
                 dbQuery = Course_info(
-                    course_id = fileTerms[0 + LEN_OF_COURSE_TABLE * x].encode('utf-8'),
+                    id = fileTerms[0 + LEN_OF_COURSE_TABLE * x].encode('utf-8'),
                     name = fileTerms[1 + LEN_OF_COURSE_TABLE * x].encode('utf-8'),
                     credits = fileTerms[2 + LEN_OF_COURSE_TABLE * x].encode('utf-8'),
                     semester = fileTerms[3 + LEN_OF_COURSE_TABLE * x].encode('utf-8'),
@@ -178,8 +178,8 @@ def courseAdd(request):
                 if form.is_valid():
                     info = form.cleaned_data
                     dbQuery = Course_info(
-                        course_id = info['course_id'],
-                        name = info['course_name'],
+                        id = info['id'],
+                        name = info['name'],
                         credits = info['credits'],
                         semester = info['semester'],
                         textbook = info['textbook'],
@@ -194,8 +194,8 @@ def courseAdd(request):
                 if form.is_valid():
                     info = form.cleaned_data
                     dbQuery = Course_info(
-                        course_id = info['course_id'],
-                        name = info['course_name'],
+                        id = info['id'],
+                        name = info['name'],
                         credits = info['credits'],
                         semester = info['semester'],
                         textbook = info['textbook'],
@@ -258,20 +258,20 @@ def courseDelete(request):
             return response
         elif 'deleteid' in request.POST:
             courseId = request.POST.get('deleteid')
-            Course_info.objects.filter(course_id = courseId).delete()
+            Course_info.objects.filter(id = courseId).delete()
             isDeleted = True
             if 'deleteTerm' in request.COOKIES and 'deleteType' in request.COOKIES:
                 searchTerm = request.COOKIES['deleteTerm']
                 searchType = request.COOKIES['deleteType']
-                if searchType == 'course_id':
-                    coursesTemp = Course_info.objects.filter(course_id = searchTerm)
+                if searchType == 'id':
+                    coursesTemp = Course_info.objects.filter(id = searchTerm)
                     courses = []
                     for course in coursesTemp:
                         if isAdmin:
                             courses.append(course)
                         elif isFaculty and (userCollege == course.college):
                             courses.append(course)
-                elif searchType == 'course_name':
+                elif searchType == 'name':
                     coursesTemp = Course_info.objects.filter(name__icontains = searchTerm)
                     courses = []
                     for course in coursesTemp:
@@ -330,10 +330,10 @@ def courseModify(request):
         elif 'modifyid' in request.POST: #initial info page
             inModify = True
             courseId = request.POST.get('modifyid')
-            term = Course_info.objects.filter(course_id = courseId)
+            term = Course_info.objects.filter(id = courseId)
             if isAdmin:
                 form = CourseFormModify(initial = {
-                'course_name': term[0].name,
+                'name': term[0].name,
                 'credits': term[0].credits,
                 'semester': term[0].semester,
                 'textbook': term[0].textbook,
@@ -343,7 +343,7 @@ def courseModify(request):
             elif isFaculty:
                 facultyModify = True
                 form = CourseFormFacultyModify(initial = {
-                'course_name': term[0].name,
+                'name': term[0].name,
                 'credits': term[0].credits,
                 'semester': term[0].semester,
                 'textbook': term[0].textbook,
@@ -356,8 +356,8 @@ def courseModify(request):
                 if form.is_valid():
                     info = form.cleaned_data
                     dbQuery = Course_info(
-                        course_id = request.POST.get('courseId'),
-                        name = info['course_name'],
+                        id = request.POST.get('courseId'),
+                        name = info['name'],
                         credits = info['credits'],
                         semester = info['semester'],
                         textbook = info['textbook'],
@@ -371,8 +371,8 @@ def courseModify(request):
                 if form.is_valid():
                     info = form.cleaned_data
                     dbQuery = Course_info(
-                        course_id = request.POST.get('courseId'),
-                        name = info['course_name'],
+                        id = request.POST.get('courseId'),
+                        name = info['name'],
                         credits = info['credits'],
                         semester = info['semester'],
                         textbook = info['textbook'],

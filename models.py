@@ -108,11 +108,11 @@ class Admin_user(models.Model):
 
 class Course_info(models.Model):
     '''
-    | course_id | name | credits | semester | textbook | college |
+    | id | name | credits | semester | textbook | college |
     |---|---|---|---|---|---|
     | CHARACTER(8) | VARCHAR(110) | FLOAT | INTEGER | VARCHAR(110) | VARCHAR(50) |
     '''
-    course_id = models.CharField(max_length=8, primary_key=True)
+    id = models.CharField(max_length=8, primary_key=True)
     name = models.CharField(max_length=110)
     credits = models.FloatField(default=0)
     semester = models.IntegerField(default=0)
@@ -122,7 +122,7 @@ class Course_info(models.Model):
     introduce = models.CharField(max_length=300, default="")
 
     def __unicode__(self):
-        return u'course_id:%s, name:%s, credits:%f, semester:%d, textbook:%s, college:%s, course_type:%d'%(self.course_id, self.name, self.credits, self.semester, self.textbook, self.college, self.course_type)
+        return u'id:%s, name:%s, credits:%f, semester:%d, textbook:%s, college:%s, course_type:%d'%(self.id, self.name, self.credits, self.semester, self.textbook, self.college, self.course_type)
 
     def __str__(self):
         return self.name
@@ -134,18 +134,18 @@ class Course_info(models.Model):
 
 class Class_info(models.Model):
     '''
-    | class_id | course_id | teacher | time | room | examdate | examtime | examroom | capacity |
+    | class_id | id | teacher | time | room | examdate | examtime | examroom | capacity |
     |---|---|---|---|---|---|---|---|---|
     | CHARACTER(10) | CHARACTER(8) | VARCHAR(20) | INTEGER | VARCHAR(20) | DATETIME(TEXT) | INTEGER | VARCHAR(20) | INTEGER |
     '''
-    class_id = models.CharField(max_length=10, primary_key=True)
-    course_id = models.ForeignKey(Course_info, related_name='class_course')
+    id = models.CharField(max_length=10, primary_key=True)
+    course = models.ForeignKey(Course_info, related_name='class_course')
     teacher = models.ForeignKey(Faculty_user)
     time = models.CharField(max_length=20) #by CCS: type integer to char
     room = models.CharField(max_length=20)
-    examdate = models.CharField(max_length=10)
-    examtime = models.CharField(max_length=10)
-    examroom = models.CharField(max_length=20)
+    examdate = models.CharField(max_length=10, default="0000000000")
+    examtime = models.CharField(max_length=10, default="0000000000")
+    examroom = models.CharField(max_length=20, default="00000000000000000000")
     capacity = models.IntegerField(default=0)
     semester = models.IntegerField(default=0) #开课学期
     remain = models.IntegerField(default=0) #选课剩余容量
@@ -165,8 +165,8 @@ class Class_table(models.Model):
     | CHARACTER(10) | CHARACTER(10) |
     '''
     id = models.CharField(max_length=10, primary_key=True)
-    student_id = models.ForeignKey(Student_user)
-    class_id = models.ForeignKey(Class_info)
+    student = models.ForeignKey(Student_user)
+    Class = models.ForeignKey(Class_info)
     status = models.BooleanField(default=0)
     def __str__(self):
         return (self.id)
