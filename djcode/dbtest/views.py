@@ -232,7 +232,8 @@ def temp_table_update(c_id, score_list):
             print(c_id)
             print(type(c_id))
             s_id_instance = Student_user.objects.filter(id=pair['studentID']).first()
-            c_id_instance = Class_info.objects.filter(class_id=c_id).first()
+            # c_id_instance = Class_info.objects.filter(class_id=c_id).first()
+            c_id_instance = Class_info.objects.filter(id=c_id).first()
             if s_id_instance is None:
                 return "上传失败。没有编号为" + pair['studentID'] + "的学生。"
             elif c_id_instance is None:
@@ -651,18 +652,21 @@ def b_final_commit(request, c_id):
     """
 
     fac = Faculty_user.objects.filter(id=request.user.username).first()
-    cla = Class_info.objects.filter(class_id=c_id).first()
+    # cla = Class_info.objects.filter(class_id=c_id).first()
+    cla = Class_info.objects.filter(id=c_id).first()
     if cla.teacher != fac.name:
         # need refresh
         # return HttpResponse()
         return render_to_response('score_alert.html',{'alert_info':u'未授权请求!','refresh_url':'/SM/commit'})
     else:
-        is_exist = TempTable.objects.filter(class_id=cla.class_id).first()
+        # is_exist = TempTable.objects.filter(class_id=cla.class_id).first()
+        is_exist = TempTable.objects.filter(class_id=cla.id).first()
         if is_exist is None:
             # need refresh
             # return HttpResponse(u'成绩未上传！')
             return render_to_response('score_alert.html',{'alert_info':u'成绩未上传！','refresh_url':'/SM/commit'})
-        score_list = TempTable.objects.filter(class_id=cla.class_id)
+        # score_list = TempTable.objects.filter(class_id=cla.class_id)
+        score_list = TempTable.objects.filter(class_id=cla.id)
         for rec in score_list:  # move score records to ScoreTable
             ScoreTable.objects.create(class_id=rec.class_id,
                                       student_id=rec.student_id,
@@ -676,7 +680,8 @@ def b_final_commit(request, c_id):
                                                  state=new_state)
             print("state updated to " + str(new_state))
 
-        TempTable.objects.filter(class_id=cla.class_id).delete()
+        # TempTable.objects.filter(class_id=cla.class_id).delete()
+        TempTable.objects.filter(class_id=cla.id).delete()
         # need refresh
         # return HttpResponse(u'提交成功！')
         return render_to_response('score_alert.html',{'alert_info':u'提交成功！','refresh_url':'/SM/commit'})
