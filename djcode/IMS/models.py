@@ -153,7 +153,7 @@ class Class_info(models.Model):
     language = models.IntegerField(default=0) #中文、英文、双语
 
     def __unicode__(self):
-        return u'class_id:%s, teacher:%s, time:%d, room:%s, examdate:%s, examtime:%d, examroom:%s, capacity:%d, semester:%d, remain:%d, year:%d, language:%d'%(self.class_id, self.teacher, self.time, self.room, self.examdate, self.examtime, self.examroom, self.capacity, self.semester, self.remain, self.year, self.language)
+        return u'class_id:%s, teacher:%s, time:%d, room:%s, examdate:%s, examtime:%d, examroom:%s, capacity:%d, semester:%d, remain:%d, year:%d, language:%d'%(self.id, self.teacher, self.time, self.room, self.examdate, self.examtime, self.examroom, self.capacity, self.semester, self.remain, self.year, self.language)
 
     def __str__(self):
         return self.id

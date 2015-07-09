@@ -373,14 +373,16 @@ def b_score_modification(c_id, s_id, score, reason):
     :param reason:
     :return:
     """
-
-    cla = Class_info.objects.get(class_id=c_id)  # get class_info object
+    print c_id
+    print s_id
+    cla = Class_info.objects.get(id=c_id)  # get class_info object
     stu = Student_user.objects.get(id=s_id)  # get student_user object
-    from_fac = Faculty_user.objects.filter(name=cla.teacher).first()
+    # from_fac = Faculty_user.objects.filter(name=cla.teacher).first()
+    from_fac = cla.teacher
     s = ScoreTable.objects.filter(class_id=c_id, student_id=s_id).first()
     print('new score {}'.format(s.score))
     print(s.class_id)
-    print(s.student_id)
+    # print(s.student_id)
     old_score = s.score
 
     # chief_faculty = cla.id.chief_faculty  # generate a new message
@@ -417,7 +419,7 @@ def b_score_modification(c_id, s_id, score, reason):
                                                      student_id=stu, class_id=cla,
                                                      old_score=old_score, new_score=score,
                                                      reason=reason, status=2)
-        print(update_message)
+        # print(update_message)
         return
 
     for info in teacher_of_course:
@@ -431,7 +433,7 @@ def b_score_modification(c_id, s_id, score, reason):
                                                      student_id=stu, class_id=cla,
                                                      old_score=old_score, new_score=score,
                                                      reason=reason, status=0)
-        print(update_message)
+        # print(update_message)
     print('after update_message')
 
 
