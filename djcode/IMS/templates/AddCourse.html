@@ -164,6 +164,10 @@
         form.submit();
     }
 
+    {% if not isSuper %}
+        $("#id_college").attr("readonly", "");
+    {% endif %}
+
     {% for field in form %}
         var input_group = $("<div class='input-group {% if field.errors %}has-error{% endif %}'></div>");
         var span = $("<span class='input-group-addon'> {{ field.label }} </span>");
