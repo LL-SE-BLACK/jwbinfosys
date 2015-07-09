@@ -90,7 +90,7 @@ def score_query(request):
     elif Type == 'teacher':
         return render(request, 'score_query_faculty.html')
     # return HttpResponse(t.render(id=name))
-    return HttpResponse("HI")
+    return HttpResponse("ERROR: Not teacher or student")
 
 
 def program_query(request):
@@ -154,7 +154,7 @@ def class_info_query(c_id):
     :param c_id: Class id
     :return: list of student info, in form of {studentID, studentName}
     """
-    tmp_cla = Class_table.objects.filter(class_id=c_id)
+    tmp_cla = Class_table.objects.filter(id=c_id)
     namelist = []
     for stu in tmp_cla:
         s = TempTable.objects.filter(student_id=stu.student_id.id,
@@ -232,7 +232,8 @@ def temp_table_update(c_id, score_list):
             print(c_id)
             print(type(c_id))
             s_id_instance = Student_user.objects.filter(id=pair['studentID']).first()
-            c_id_instance = Class_info.objects.filter(class_id=c_id).first()
+            # c_id_instance = Class_info.objects.filter(class_id=c_id).first()
+            c_id_instance = Class_info.objects.filter(id=c_id).first()
             if s_id_instance is None:
                 return "上传失败。没有编号为" + pair['studentID'] + "的学生。"
             elif c_id_instance is None:
@@ -361,7 +362,9 @@ def B_score_modification(request, c_id, s_id):
     # print(mf.is_valid())
     # print(mf)
     b_score_modification(c_id, s_id, score, reason)
-    return HttpResponse("上传成功")
+    # return HttpResponse("上传成功")
+    # need refresh
+    return render_to_response('score_alert.html',{'alert_info':'上传成功','refresh_url':'/SM/modification'})
 
 
 def b_score_modification(c_id, s_id, score, reason):
@@ -373,14 +376,16 @@ def b_score_modification(c_id, s_id, score, reason):
     :param reason:
     :return:
     """
-
-    cla = Class_info.objects.get(class_id=c_id)  # get class_info object
+    print c_id
+    print s_id
+    cla = Class_info.objects.get(id=c_id)  # get class_info object
     stu = Student_user.objects.get(id=s_id)  # get student_user object
-    from_fac = Faculty_user.objects.filter(name=cla.teacher).first()
+    # from_fac = Faculty_user.objects.filter(name=cla.teacher).first()
+    from_fac = cla.teacher
     s = ScoreTable.objects.filter(class_id=c_id, student_id=s_id).first()
     print('new score {}'.format(s.score))
     print(s.class_id)
-    print(s.student_id)
+    # print(s.student_id)
     old_score = s.score
 
     # chief_faculty = cla.id.chief_faculty  # generate a new message
@@ -417,7 +422,7 @@ def b_score_modification(c_id, s_id, score, reason):
                                                      student_id=stu, class_id=cla,
                                                      old_score=old_score, new_score=score,
                                                      reason=reason, status=2)
-        print(update_message)
+        # print(update_message)
         return
 
     for info in teacher_of_course:
@@ -431,7 +436,7 @@ def b_score_modification(c_id, s_id, score, reason):
                                                      student_id=stu, class_id=cla,
                                                      old_score=old_score, new_score=score,
                                                      reason=reason, status=0)
-        print(update_message)
+        # print(update_message)
     print('after update_message')
 
 
@@ -541,16 +546,21 @@ def b_sanction(request, msg_id, status):
             # rec.score = l.new_score
             # rec.save()  # change score
             check_msg_status(msg_id)
-            return HttpResponse(u'审核成功，您的意见是同意')
+            # need refresh
+            # return HttpResponse(u'审核成功，您的意见是同意')
+            return render_to_response('score_alert.html',{'alert_info':u'审核成功，您的意见是同意','refresh_url':'/SM/modification'})
         elif status == '0':
             print('disagree')
             l.status = -1
             l.save()  # update status as 'rejected'
             check_msg_status(msg_id)
-            return HttpResponse(u'审核成功，您的意见是不同意')
-
+            # need refresh
+            # return HttpResponse(u'审核成功，您的意见是同意')
+            return render_to_response('score_alert.html',{'alert_info':u'审核成功，您的意见是不同意','refresh_url':'/SM/modification'})
     except:
-        return HttpResponse(u'非法记录号')
+        # need refresh
+        # return HttpResponse(u'非法记录号')
+        return render_to_response('score_alert.html',{'alert_info':u'非法记录号','refresh_url':'/SM/modification'})
 
 
 def count_faculty_of_course(id):
@@ -608,30 +618,30 @@ def save_new_mod_score(message_id):
     stu_score.save()
 
 
-def b_sanction_result(request, msg_id):
-    """
-    To update the message status, usually making it True
-    :param msg_id: messageID in the MessageTable
-    :return: if_succeeded as an HttpResponse object
-    """
-    try:
-        Check_list = MessageTable.objects.filter(message_id=msg_id)
-        l = Check_list[0]
-        count = 0
-        for ck in Check_list:
-            if (ck.status > 0):
-                count += 1
-        if count > len(Check_list):
-            rec = ScoreTable.objects.filter(class_id=l.class_id.class_id,
-                                            student_id=l.student_id.id).first()
-            rec.score = l.new_score
-            rec.save()  # change score
+# def b_sanction_result(request, msg_id):
+#     """
+#     To update the message status, usually making it True
+#     :param msg_id: messageID in the MessageTable
+#     :return: if_succeeded as an HttpResponse object
+#     """
+#     try:
+#         Check_list = MessageTable.objects.filter(message_id=msg_id)
+#         l = Check_list[0]
+#         count = 0
+#         for ck in Check_list:
+#             if (ck.status > 0):
+#                 count += 1
+#         if count > len(Check_list):
+#             rec = ScoreTable.objects.filter(class_id=l.class_id.class_id,
+#                                             student_id=l.student_id.id).first()
+#             rec.score = l.new_score
+#             rec.save()  # change score
 
-            return HttpResponse(u'审核通过')
-        else:
-            return HttpResponse(u'审核不通过')
-    except:
-        return HttpResponse(u'非法记录号')
+#             return HttpResponse(u'审核通过')
+#         else:
+#             return HttpResponse(u'审核不通过')
+#     except:
+#         return HttpResponse(u'非法记录号')
 
 
 def b_final_commit(request, c_id):
@@ -642,14 +652,21 @@ def b_final_commit(request, c_id):
     """
 
     fac = Faculty_user.objects.filter(id=request.user.username).first()
-    cla = Class_info.objects.filter(class_id=c_id).first()
+    # cla = Class_info.objects.filter(class_id=c_id).first()
+    cla = Class_info.objects.filter(id=c_id).first()
     if cla.teacher != fac.name:
-        return HttpResponse(u'未授权请求!')
+        # need refresh
+        # return HttpResponse()
+        return render_to_response('score_alert.html',{'alert_info':u'未授权请求!','refresh_url':'/SM/commit'})
     else:
-        is_exist = TempTable.objects.filter(class_id=cla.class_id).first()
+        # is_exist = TempTable.objects.filter(class_id=cla.class_id).first()
+        is_exist = TempTable.objects.filter(class_id=cla.id).first()
         if is_exist is None:
-            return HttpResponse(u'成绩未上传！')
-        score_list = TempTable.objects.filter(class_id=cla.class_id)
+            # need refresh
+            # return HttpResponse(u'成绩未上传！')
+            return render_to_response('score_alert.html',{'alert_info':u'成绩未上传！','refresh_url':'/SM/commit'})
+        # score_list = TempTable.objects.filter(class_id=cla.class_id)
+        score_list = TempTable.objects.filter(class_id=cla.id)
         for rec in score_list:  # move score records to ScoreTable
             ScoreTable.objects.create(class_id=rec.class_id,
                                       student_id=rec.student_id,
@@ -663,8 +680,11 @@ def b_final_commit(request, c_id):
                                                  state=new_state)
             print("state updated to " + str(new_state))
 
-        TempTable.objects.filter(class_id=cla.class_id).delete()
-        return HttpResponse(u'提交成功！')
+        # TempTable.objects.filter(class_id=cla.class_id).delete()
+        TempTable.objects.filter(class_id=cla.id).delete()
+        # need refresh
+        # return HttpResponse(u'提交成功！')
+        return render_to_response('score_alert.html',{'alert_info':u'提交成功！','refresh_url':'/SM/commit'})
 
 
 def db_scheme_info_query(s_id):
@@ -745,10 +765,15 @@ def upload_xlsx(request, c_id):
                 print("Cannot remove file" + upload_dir + '{}'.format(orig_filename))
 
             if hr:
-                return HttpResponse(hr)
+                # need refresh
+                # return HttpResponse(hr)
+                return render_to_response('score_alert.html',{'alert_info':hr,'refresh_url':'/SM/commit'})
+
             # else:
             # return HttpResponse('upload ok!')
-            return HttpResponse('上传成功！')
+            # need refresh
+            # return HttpResponse('上传成功！')
+            return render_to_response('score_alert.html',{'alert_info':u'上传成功！','refresh_url':'/SM/commit'})
     else:
         uf = XlsxForm()
 
@@ -818,7 +843,8 @@ def b_online_save(request, s_id, c_id):
     new_score = request.POST['newScore']
 
     temp_table_update(c_id, [{'studentID': s_id, 'score': new_score}])
-    return HttpResponse('修改成功')
+    # need refresh  
+    return render_to_response('score_alert.html',{'alert_info':'修改成功','refresh_url':'/SM/commit'})
 
 
 def class_info_online_save(id, scores):
