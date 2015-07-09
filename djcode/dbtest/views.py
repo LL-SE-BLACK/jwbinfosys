@@ -154,7 +154,7 @@ def class_info_query(c_id):
     :param c_id: Class id
     :return: list of student info, in form of {studentID, studentName}
     """
-    tmp_cla = Class_table.objects.filter(class_id=c_id)
+    tmp_cla = Class_table.objects.filter(id=c_id)
     namelist = []
     for stu in tmp_cla:
         s = TempTable.objects.filter(student_id=stu.student_id.id,
