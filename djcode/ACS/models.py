@@ -10,16 +10,13 @@ class classroom(models.Model):
 	| id | name | type | capacity | campus |
 	| VARCHAR(20) | VARCHAR(20) | VARCHAR(20) | interget | VARCHAR(20) |
 	'''
-	#id = models.CharField(max_length=20,primary_key=True)
+	id = models.CharField(max_length=20,primary_key=True)
 	name = models.CharField(max_length=20)
 	type = models.CharField(max_length=20, default = 'classroom')
 	capacity = models.IntegerField()
 	campus = models.CharField(max_length=20)
 
 class Application(models.Model):
-	'''
-
-	'''
 	#class id
 	#cl_ID=models.CharField(max_length=20,primary_key=True)
 	id = models.CharField(max_length=20, primary_key=True)

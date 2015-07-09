@@ -4,8 +4,8 @@ from django.contrib import admin
 from IMS.models import *
 
 class CourseAdmin(admin.ModelAdmin):
-	list_display = ('course_id', 'name', 'credits', 'semester', 'textbook', 'college')
-	search_fields = ('course_id', 'name')
+	list_display = ('id', 'name', 'credits', 'semester', 'textbook', 'college')
+	search_fields = ('id', 'name')
 
 admin.site.register(Student_user)
 admin.site.register(Faculty_user)

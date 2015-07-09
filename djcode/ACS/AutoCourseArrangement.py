@@ -2,7 +2,7 @@ import json
 import time
 import itertools
 from django.db import models
-from IMS.models import Faculty_user, Class_info
+from IMS.models import Faculty_user, Class_info, Course_info
 from models import classroom, Application
 
 class ClassroomSchedule:
@@ -15,6 +15,15 @@ class ClassroomSchedule:
 			self.schedule[i] = ""
 
 class TeacherSchedule:
+	def __init__(self):
+		self.initSchedule()
+
+	def initSchedule(self):
+		self.schedule = {}
+		for i in range(1, 36):
+			self.schedule[i] = ""
+
+class ExamSchedule:
 	def __init__(self):
 		self.initSchedule()
 
@@ -36,7 +45,7 @@ class AutoCourseArrange:
 		self.application = Application.objects.all()
 		# teacher model
 		self.teacher = Faculty_user.objects.all()
-		print self.teacher
+		# print self.teacher
 		# init schedules of all classroom
 		self.ClassroomSchedule = {}
 		for room in self.classroom:
@@ -62,9 +71,10 @@ class AutoCourseArrange:
 		#		break
 		#print "there are ", self.arrange(), "classes arranged"
 		self.arrange()
-		print self.Schedule
-		for i in self.Schedule:
-			print i
+		#print self.Schedule
+		#for i in self.Schedule:
+		#	print i
+		# self.arrangeExam()
 
 	def getCurrentTime(self):
 		return time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
@@ -105,7 +115,7 @@ class AutoCourseArrange:
 						break
 				if flag:
 					break
-		return arranged_classes	
+		return arranged_classes
 
 	def ApplicationFitClassroom(self, application, classroom):
 		if application.campus!=None and application.campus!=classroom.campus:

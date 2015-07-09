@@ -22,7 +22,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import user_passes_test
-from IMS.models import Student_user, Faculty_user, Course_info, Class_info, Class_table
+from IMS.models import *
 ###
 # from dbtest.xls_utils import get_demo_xlsx
 
@@ -90,7 +90,7 @@ def score_query(request):
     elif Type == 'teacher':
         return render(request, 'score_query_faculty.html')
     # return HttpResponse(t.render(id=name))
-    return HttpResponse("HI")
+    return HttpResponse("ERROR: Not teacher or student")
 
 
 def program_query(request):
@@ -136,10 +136,10 @@ def b_student_query(request):
             tmp_gpa = (tmp_score - 60) / 10 + 1.5
             if tmp_gpa > 5:
                 tmp_gpa = 5
-        tmp_node = {'courseID': tmp_class.course_id.course_id,
-                    'courseName': tmp_class.course_id.name,
-                    'credit': tmp_class.course_id.credits,
-                    'semester': tmp_class.course_id.semester,
+        tmp_node = {'courseID': tmp_class.id.id,
+                    'courseName': tmp_class.id.name,
+                    'credit': tmp_class.id.credits,
+                    'semester': tmp_class.id.semester,
                     'score': tmp_score,
                     'gradePoint': tmp_gpa
                     }
@@ -154,7 +154,7 @@ def class_info_query(c_id):
     :param c_id: Class id
     :return: list of student info, in form of {studentID, studentName}
     """
-    tmp_cla = Class_table.objects.filter(class_id=c_id)
+    tmp_cla = Class_table.objects.filter(id=c_id)
     namelist = []
     for stu in tmp_cla:
         s = TempTable.objects.filter(student_id=stu.student_id.id,
@@ -232,7 +232,8 @@ def temp_table_update(c_id, score_list):
             print(c_id)
             print(type(c_id))
             s_id_instance = Student_user.objects.filter(id=pair['studentID']).first()
-            c_id_instance = Class_info.objects.filter(class_id=c_id).first()
+            # c_id_instance = Class_info.objects.filter(class_id=c_id).first()
+            c_id_instance = Class_info.objects.filter(id=c_id).first()
             if s_id_instance is None:
                 return "上传失败。没有编号为" + pair['studentID'] + "的学生。"
             elif c_id_instance is None:
@@ -291,9 +292,9 @@ def faculty_class_query(f_id, is_temp):
         tmp_node = {  # generate node for list
                       'classID': cla.class_id,
                       'classTime': cla.time,
-                      'courseID': cla.course_id.course_id,
-                      'courseName': cla.course_id.name,
-                      'credits': cla.course_id.credits
+                      'courseID': cla.id.id,
+                      'courseName': cla.id.name,
+                      'credits': cla.id.credits
                       }
         info_list.append(tmp_node)
     return info_list
@@ -361,7 +362,9 @@ def B_score_modification(request, c_id, s_id):
     # print(mf.is_valid())
     # print(mf)
     b_score_modification(c_id, s_id, score, reason)
-    return HttpResponse("上传成功")
+    # return HttpResponse("上传成功")
+    # need refresh
+    return render_to_response('score_alert.html',{'alert_info':'上传成功','refresh_url':'/SM/modification'})
 
 
 def b_score_modification(c_id, s_id, score, reason):
@@ -373,17 +376,19 @@ def b_score_modification(c_id, s_id, score, reason):
     :param reason:
     :return:
     """
-
-    cla = Class_info.objects.get(class_id=c_id)  # get class_info object
+    print c_id
+    print s_id
+    cla = Class_info.objects.get(id=c_id)  # get class_info object
     stu = Student_user.objects.get(id=s_id)  # get student_user object
-    from_fac = Faculty_user.objects.filter(name=cla.teacher).first()
+    # from_fac = Faculty_user.objects.filter(name=cla.teacher).first()
+    from_fac = cla.teacher
     s = ScoreTable.objects.filter(class_id=c_id, student_id=s_id).first()
     print('new score {}'.format(s.score))
     print(s.class_id)
-    print(s.student_id)
+    # print(s.student_id)
     old_score = s.score
 
-    # chief_faculty = cla.course_id.chief_faculty  # generate a new message
+    # chief_faculty = cla.id.chief_faculty  # generate a new message
     # update_message = MessageTable.objects.create(from_faculty_id=from_fac,
     # 											 to_faculty_id=chief_faculty,
     # 											 student_id=stu, class_id=cla,
@@ -400,10 +405,10 @@ def b_score_modification(c_id, s_id, score, reason):
     top_msg_id += 1
     print('new msg id {}'.format(top_msg_id))
 
-    teacher_of_course = Class_info.objects.filter(course_id=cla.course_id)
-    print('teacher of the course {} is {}'.format(cla.course_id, len(teacher_of_course)))
+    teacher_of_course = Class_info.objects.filter(id=cla.id)
+    print('teacher of the course {} is {}'.format(cla.id, len(teacher_of_course)))
 
-    if count_faculty_of_course(cla.course_id) == 1:
+    if count_faculty_of_course(cla.id) == 1:
         # TODO: no verified
         # get this score and update and save it
         score_row = ScoreTable.objects.get(class_id=c_id, student_id=s_id)
@@ -417,7 +422,7 @@ def b_score_modification(c_id, s_id, score, reason):
                                                      student_id=stu, class_id=cla,
                                                      old_score=old_score, new_score=score,
                                                      reason=reason, status=2)
-        print(update_message)
+        # print(update_message)
         return
 
     for info in teacher_of_course:
@@ -431,7 +436,7 @@ def b_score_modification(c_id, s_id, score, reason):
                                                      student_id=stu, class_id=cla,
                                                      old_score=old_score, new_score=score,
                                                      reason=reason, status=0)
-        print(update_message)
+        # print(update_message)
     print('after update_message')
 
 
@@ -465,7 +470,7 @@ def db_query_modify_info(faculty_id):
             tmp_status = 'pending'
         temp_node = {  # generate node
                        'messageID': rec.message_id,
-                       'className': rec.class_id.course_id.name,
+                       'className': rec.class_id.id.name,
                        'studentID': rec.student_id.id,
                        'studentName': rec.student_id.name,
                        'old_score': rec.old_score,
@@ -489,7 +494,7 @@ def db_query_modify_info(faculty_id):
             tmp_status = 'final_reject'
         temp_node = {
         'messageID': rec.message_id,
-        'className': rec.class_id.course_id.name,
+        'className': rec.class_id.id.name,
         'studentID': rec.student_id.id,
         'studentName': rec.student_id.name,
         'old_score': rec.old_score,
@@ -541,20 +546,25 @@ def b_sanction(request, msg_id, status):
             # rec.score = l.new_score
             # rec.save()  # change score
             check_msg_status(msg_id)
-            return HttpResponse(u'审核成功，您的意见是同意')
+            # need refresh
+            # return HttpResponse(u'审核成功，您的意见是同意')
+            return render_to_response('score_alert.html',{'alert_info':u'审核成功，您的意见是同意','refresh_url':'/SM/modification'})
         elif status == '0':
             print('disagree')
             l.status = -1
             l.save()  # update status as 'rejected'
             check_msg_status(msg_id)
-            return HttpResponse(u'审核成功，您的意见是不同意')
-
+            # need refresh
+            # return HttpResponse(u'审核成功，您的意见是同意')
+            return render_to_response('score_alert.html',{'alert_info':u'审核成功，您的意见是不同意','refresh_url':'/SM/modification'})
     except:
-        return HttpResponse(u'非法记录号')
+        # need refresh
+        # return HttpResponse(u'非法记录号')
+        return render_to_response('score_alert.html',{'alert_info':u'非法记录号','refresh_url':'/SM/modification'})
 
 
-def count_faculty_of_course(course_id):
-    return len(Class_info.objects.filter(course_id=course_id))
+def count_faculty_of_course(id):
+    return len(Class_info.objects.filter(id=id))
 
 
 def check_msg_status(message_id):
@@ -578,9 +588,9 @@ def check_msg_status(message_id):
         elif row.status == -1:
             rejected_count += 1
 
-    course_id = msg_list.first().class_id.course_id
+    id = msg_list.first().class_id.id
 
-    faculty_cnt = count_faculty_of_course(course_id)
+    faculty_cnt = count_faculty_of_course(id)
 
     if (faculty_cnt < 3 and admitted_count >= faculty_cnt - 1) or (faculty_cnt >= 3 and admitted_count >= 2):
         # admit
@@ -608,30 +618,30 @@ def save_new_mod_score(message_id):
     stu_score.save()
 
 
-def b_sanction_result(request, msg_id):
-    """
-    To update the message status, usually making it True
-    :param msg_id: messageID in the MessageTable
-    :return: if_succeeded as an HttpResponse object
-    """
-    try:
-        Check_list = MessageTable.objects.filter(message_id=msg_id)
-        l = Check_list[0]
-        count = 0
-        for ck in Check_list:
-            if (ck.status > 0):
-                count += 1
-        if count > len(Check_list):
-            rec = ScoreTable.objects.filter(class_id=l.class_id.class_id,
-                                            student_id=l.student_id.id).first()
-            rec.score = l.new_score
-            rec.save()  # change score
+# def b_sanction_result(request, msg_id):
+#     """
+#     To update the message status, usually making it True
+#     :param msg_id: messageID in the MessageTable
+#     :return: if_succeeded as an HttpResponse object
+#     """
+#     try:
+#         Check_list = MessageTable.objects.filter(message_id=msg_id)
+#         l = Check_list[0]
+#         count = 0
+#         for ck in Check_list:
+#             if (ck.status > 0):
+#                 count += 1
+#         if count > len(Check_list):
+#             rec = ScoreTable.objects.filter(class_id=l.class_id.class_id,
+#                                             student_id=l.student_id.id).first()
+#             rec.score = l.new_score
+#             rec.save()  # change score
 
-            return HttpResponse(u'审核通过')
-        else:
-            return HttpResponse(u'审核不通过')
-    except:
-        return HttpResponse(u'非法记录号')
+#             return HttpResponse(u'审核通过')
+#         else:
+#             return HttpResponse(u'审核不通过')
+#     except:
+#         return HttpResponse(u'非法记录号')
 
 
 def b_final_commit(request, c_id):
@@ -642,14 +652,21 @@ def b_final_commit(request, c_id):
     """
 
     fac = Faculty_user.objects.filter(id=request.user.username).first()
-    cla = Class_info.objects.filter(class_id=c_id).first()
+    # cla = Class_info.objects.filter(class_id=c_id).first()
+    cla = Class_info.objects.filter(id=c_id).first()
     if cla.teacher != fac.name:
-        return HttpResponse(u'未授权请求!')
+        # need refresh
+        # return HttpResponse()
+        return render_to_response('score_alert.html',{'alert_info':u'未授权请求!','refresh_url':'/SM/commit'})
     else:
-        is_exist = TempTable.objects.filter(class_id=cla.class_id).first()
+        # is_exist = TempTable.objects.filter(class_id=cla.class_id).first()
+        is_exist = TempTable.objects.filter(class_id=cla.id).first()
         if is_exist is None:
-            return HttpResponse(u'成绩未上传！')
-        score_list = TempTable.objects.filter(class_id=cla.class_id)
+            # need refresh
+            # return HttpResponse(u'成绩未上传！')
+            return render_to_response('score_alert.html',{'alert_info':u'成绩未上传！','refresh_url':'/SM/commit'})
+        # score_list = TempTable.objects.filter(class_id=cla.class_id)
+        score_list = TempTable.objects.filter(class_id=cla.id)
         for rec in score_list:  # move score records to ScoreTable
             ScoreTable.objects.create(class_id=rec.class_id,
                                       student_id=rec.student_id,
@@ -659,12 +676,15 @@ def b_final_commit(request, c_id):
             else:
                 new_state = -1
             # should be update() not update_or_create, but right now the database is incomplete
-            Scheme_info.objects.update_or_create(course_id=rec.class_id.course_id, student_id=rec.student_id,
+            Scheme_info.objects.update_or_create(id=rec.class_id.id, student_id=rec.student_id,
                                                  state=new_state)
             print("state updated to " + str(new_state))
 
-        TempTable.objects.filter(class_id=cla.class_id).delete()
-        return HttpResponse(u'提交成功！')
+        # TempTable.objects.filter(class_id=cla.class_id).delete()
+        TempTable.objects.filter(class_id=cla.id).delete()
+        # need refresh
+        # return HttpResponse(u'提交成功！')
+        return render_to_response('score_alert.html',{'alert_info':u'提交成功！','refresh_url':'/SM/commit'})
 
 
 def db_scheme_info_query(s_id):
@@ -680,11 +700,11 @@ def db_scheme_info_query(s_id):
         tmp_node = {
         'studentID': cou.student_id.id,
         'studentName': cou.student_id.name,
-        'courseId': cou.course_id.course_id,
-        'courseName': cou.course_id.name,
-        'courseSemester': cou.course_id.semester,
-        'courseCollege': cou.course_id.college,
-        'credits': cou.course_id.credits,
+        'courseId': cou.id.id,
+        'courseName': cou.id.name,
+        'courseSemester': cou.id.semester,
+        'courseCollege': cou.id.college,
+        'credits': cou.id.credits,
         'state': cou.state
         }
         ret_list.append(tmp_node)
@@ -745,10 +765,15 @@ def upload_xlsx(request, c_id):
                 print("Cannot remove file" + upload_dir + '{}'.format(orig_filename))
 
             if hr:
-                return HttpResponse(hr)
+                # need refresh
+                # return HttpResponse(hr)
+                return render_to_response('score_alert.html',{'alert_info':hr,'refresh_url':'/SM/commit'})
+
             # else:
             # return HttpResponse('upload ok!')
-            return HttpResponse('上传成功！')
+            # need refresh
+            # return HttpResponse('上传成功！')
+            return render_to_response('score_alert.html',{'alert_info':u'上传成功！','refresh_url':'/SM/commit'})
     else:
         uf = XlsxForm()
 
@@ -785,55 +810,56 @@ def download_xlsx(request, c_id):
 editing_class = []
 
 
-# def class_info_online_edit(course_id):
+# def class_info_online_edit(id):
 #     """
 #     get class score info for online editing
-#     :param course_id: course id
+#     :param id: course id
 #     :return: a list of dict with the following keys
 #     ('studentID', 'studentName', 'score') None for 'not able to edit'
 #     """
 #
 #     # check if the queried course is already being edited.
-#     if editing_class.index(course_id) is not None:
+#     if editing_class.index(id) is not None:
 #         return None
 #
-#     return class_info_query(course_id)
+#     return class_info_query(id)
 
-def class_info_online_edit(request, course_id):
+def class_info_online_edit(request, id):
     """
     get class score info for online editing
-    :param course_id: course id
+    :param id: course id
     :return: a list of dict with the following keys
     {studentID, studentName, score, gradePoint} None for 'not able to edit'
     """
 
     # check if the queried course is already being edited.
-    if editing_class.index(course_id) is not None:
+    if editing_class.index(id) is not None:
         return None
 
-    return db_temp_table_query(course_id)
+    return db_temp_table_query(id)
 
 
 def b_online_save(request, s_id, c_id):
     new_score = request.POST['newScore']
 
     temp_table_update(c_id, [{'studentID': s_id, 'score': new_score}])
-    return HttpResponse('修改成功')
+    # need refresh  
+    return render_to_response('score_alert.html',{'alert_info':'修改成功','refresh_url':'/SM/commit'})
 
 
-def class_info_online_save(course_id, scores):
+def class_info_online_save(id, scores):
     """
     save online score info
-    :param course_id: the editing class id
+    :param id: the editing class id
     :param scores: scores after modification , is a dictionary with key 'studentID', 'score'
     :return: nothing
     """
 
     # remove the class from editing_class list
-    if editing_class.index(course_id) is not None:
-        editing_class.remove(course_id)
+    if editing_class.index(id) is not None:
+        editing_class.remove(id)
 
-    temp_table_update(course_id, scores)
+    temp_table_update(id, scores)
 
 
 def get_scheme_info(request):

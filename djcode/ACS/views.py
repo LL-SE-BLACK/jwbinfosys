@@ -23,8 +23,8 @@ def Logout(request):
 
 @csrf_exempt
 def TeachingResourse(request, offset):#管理教室
-	if not request.user.is_staff:
-		return HttpResponseRedirect('../mca')#非法url
+	#if not request.user.is_staff:
+	#	return HttpResponseRedirect('../mca')#非法url
 	
 	del_r = ''
 	add_r = ''
@@ -40,13 +40,11 @@ def TeachingResourse(request, offset):#管理教室
 			
 			try:
 				p = classroom.objects.create( name = f["cr_Name"], type = f["cr_Type"], capacity = f["cr_capa"], campus = f["cr_camp"])
-
 				p.save()
 				add_r = 'add seccess'
 			except StandardError, e:
 				add_r = 'add fail'
 		elif offset == "del" :#删除
-			
 			try:
 				p = classroom.objects.get(id = f["cr_ID"])
 				p.delete()
@@ -54,7 +52,6 @@ def TeachingResourse(request, offset):#管理教室
 			except StandardError, e:
 				del_r = 'delete fail'
 		elif offset == "mod":#更新
-			
 			try:
 				p = classroom.objects.filter(id = f["cr_ID"])
 				p.update(capacity = f["cr_capa"])
@@ -63,7 +60,7 @@ def TeachingResourse(request, offset):#管理教室
 				mod_r = 'modify fail'
 		else:
 			return HttpResponse("error")#其他
-	return render_to_response(get_template('cr.html'), {'admin': admin, 'add_result':add_r, 'del_result':del_r, 'mod_result':mod_r})
+	return render_to_response('cr.html', {'admin': admin, 'add_result':add_r, 'del_result':del_r, 'mod_result':mod_r})
 
 @csrf_exempt
 def CourseArrange(request, offset):
@@ -139,8 +136,6 @@ def CourseApply(request, offset):
 				del_r = 'delete seccess'
 			except StandardError, e:
 				del_r = 'delete fail'
-		
-		
 	return render_to_response('mca.html', {'admin': admin, 'add_result':add_r, 'del_result':del_r, 'applylist':ApplyList})
 
 @csrf_exempt
@@ -148,6 +143,7 @@ def Index(request, offset):#登录部分
 	if offset == 'teacher':
 		user = auth.authenticate(username='t', password='')
 		#u = 'mca.html'
+		print "teacher"
 		u = '/ACS/mca/'
 		#auth.login(request, user)
 		#admin = user.is_staff
@@ -155,14 +151,16 @@ def Index(request, offset):#登录部分
 	elif offset == 'admin':
 		user = auth.authenticate(username='a', password='')
 		#u = 'cr.html'
+		print "admin"
 		u = '/ACS/cr/'
 		#auth.login(request, user)
 		#admin = user.is_staff
 		return HttpResponseRedirect(u)
 	else:
 		user = None
-		u = 'main.html'
-		return render_to_response('main.html')
+		u = 'ACS_main.html'
+		print "enter main.html"
+		return render_to_response('ACS_main.html')
 	
 @csrf_exempt
 def CourseSearch(request):#课程查询
@@ -171,7 +169,6 @@ def CourseSearch(request):#课程查询
 		CourseTable = ListToTable(CourseList)
 	except StandardError, e:
 		CourseTable = ""
-	
 	return render_to_response('tcs.html', {'schedule':CourseTable, 'admin':request.user.is_staff})
 
 @csrf_exempt
@@ -201,23 +198,23 @@ def CourseOperation(request, offset):
 		f = request.POST
 	else:
 		f = 0
-	
 	if offset == 'add_cz':#增加课程
 		try:
-			p = Course_info.objects.create(course_id = f["cz_ID"], 
+			p = Course_info.objects.create(id = f["cz_ID"], 
 										name = f["cz_Name"], 
 										credits = f["cz_Credits"], 
-										time = f["cz_Time"], 
 										semester = f["cz_Term"],
 										textbook = f["cz_Testbook"],
-										college = f["cz_College"])
+										college = f["cz_College"],
+										#time = f["cz_Time"], 
+										)
 			p.save()
 			add_r = 'add seccess'
 		except StandardError, e:
 				add_r = 'add fail'
 	elif offset == 'del_cz':
 		try:
-			p = Course_info.objects.get(course_id = f["cz_ID"])
+			p = Course_info.objects.get(id = f["cz_ID"])
 			p.delete()
 			del_r = 'delete seccess'
 		except StandardError, e:
@@ -229,7 +226,6 @@ def CourseOperation(request, offset):
 		t2 = f["cl_Hour2"]
 		#时间处理
 		t1 = dec_time(int(t1))
-		
 		r = []
 		for i in t1:
 			r.append([int(w1), i])
@@ -243,10 +239,10 @@ def CourseOperation(request, offset):
 		roomtime = 0
 		over= 0
 		#检查同一老师同一时间
-		a = Class_info.objects.filter(teacher = f["teac_ID"], classTime = t)#
+		a = Class_info.objects.filter(teacher = f["teac_ID"], time = t)#
 		teachertime = a and 1 or 0
 		#检查相同教室相同时间
-		a = Class_info.objects.filter(classroom = f["cl_room"], classTime = t)
+		a = Class_info.objects.filter(room = f["cl_room"], time = t)
 		roomtime = a and 1 or 0
 		a = classroom.objects.filter(name = f["cl_room"])
 		over = a[0].capacity
@@ -257,10 +253,10 @@ def CourseOperation(request, offset):
 			add_2 = False
 		else:
 			try:
-				p = Class_info.objects.create(course_id = f["cuz_ID"], 
+				p = Class_info.objects.create(course = f["cuz_ID"], 
 											teacher = f["teac_ID"],
-											classTime = t,
-											classroom = f["cl_room"], 
+											time = t,
+											room = f["cl_room"], 
 											capacity = f["cl_Capa"])
 				p.save()
 				add_2 = True			

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'John'
 
 from head import *
@@ -140,6 +141,7 @@ def getSearchResult(searchType, searchTerm, userCollege, userType):
 
 @login_required
 def facultyAdd(request):
+    group = Group.objects.get(name='teacher')
     errors = []
     errorImport = []
     existed = []
@@ -154,6 +156,10 @@ def facultyAdd(request):
     isSuper = False
     if userCollege == 'all':
         isSuper = True
+
+    #get all colleges from Student_user
+    stu_colleges = Student_user.objects.all()
+    stu_colleges = list(set([row.college for row in stu_colleges]))
 
     if request.method == 'POST':
         if request.POST.get('multiAddCancel') or request.POST.get('first'): #click cancle button or first access
@@ -175,6 +181,7 @@ def facultyAdd(request):
                 if state == 'YEAH'.encode('utf-8'):
                     dbQuery.save()
                     user = User.objects.create_user(dbQuery.id, dbQuery.id+"@zju.edu.cn", "123456")
+                    user.groups.add(group)
                 else:
                     errorExist = True
                     returnListItem = fileTerms[0 + LEN_OF_FACULTY_TABLE * x : LEN_OF_FACULTY_TABLE + LEN_OF_FACULTY_TABLE * x];
@@ -208,6 +215,7 @@ def facultyAdd(request):
                 )
                 dbQuery.save()
                 user = User.objects.create_user(dbQuery.id, dbQuery.id+"@zju.edu.cn", "123456")
+                user.groups.add(group)
                 if dbQuery.isSpecial:
                     if info['canManageCourses']:
                         perm = Permission.objects.get(codename='course_manage')
@@ -335,6 +343,7 @@ def facultyModify(request):
 
 @login_required
 def studentAdd(request):
+    group = Group.objects.get(name='student')
     errors = []
     errorImport = []
     addIsDone = False
@@ -342,12 +351,16 @@ def studentAdd(request):
     if Admin_user.objects.filter(id = request.user.username):
         userCollege = Admin_user.objects.filter(id = request.user.username)[0].college
     elif Faculty_user.objects.filter(id = request.user.username):
-        userCollege = Admin_user.objects.filter(id = request.user.username)[0].college
+        userCollege = Faculty_user.objects.filter(id = request.user.username)[0].college
     else:
         userCollege = Student_user.objects.filter(id = request.user.username)[0].college
     isSuper = False
     if userCollege == 'all':
         isSuper = True
+
+    #get all colleges from Student_user
+    stu_colleges = Student_user.objects.all()
+    stu_colleges = list(set([row.college for row in stu_colleges]))
 
     if request.method  ==   'POST':
         if request.POST.get('multiAddCancle') or request.POST.get('first'): #click cancle button or first access
@@ -369,6 +382,7 @@ def studentAdd(request):
                 state = importStudentCheck(fileTerms[0 + LEN_OF_STUDENT_TABLE * x : LEN_OF_STUDENT_TABLE + LEN_OF_STUDENT_TABLE * x])
                 if state == 'YEAH'.encode('utf-8'):
                     user = User.objects.create_user(dbQuery.id, dbQuery.id+"@zju.edu.cn", "123456")
+                    user.groups.add(group)
                     dbQuery.save()
                 else:
                     errorExist = True
@@ -404,6 +418,7 @@ def studentAdd(request):
                 )
                 dbQuery.save()
                 user = User.objects.create_user(dbQuery.id, dbQuery.id+"@zju.edu.cn", "123456")
+                user.groups.add(group)
                 if dbQuery.isSpecial:
                     if info['canManageCourses']:
                         perm = Permission.objects.get(codename='course_manage')
@@ -534,14 +549,30 @@ def studentModify(request):
 @login_required
 @permission_required('IMS.admin_manage')
 def adminAdd(request):
+    group = Group.objects.get(name='admin')
     errors = []
     errorImport = []
     existed = []
     addIsDone = False
 
+    userCollege = ""
+    if Admin_user.objects.filter(id = request.user.username):
+        userCollege = Admin_user.objects.filter(id = request.user.username)[0].college
+    elif Faculty_user.objects.filter(id = request.user.username):
+        userCollege = Faculty_user.objects.filter(id = request.user.username)[0].college
+    else:
+        userCollege = Student_user.objects.filter(id = request.user.username)[0].college
+    isSuper = False
+    if userCollege == 'all':
+        isSuper = True
+
+    #get all colleges from Student_user
+    stu_colleges = Student_user.objects.all()
+    stu_colleges = list(set([row.college for row in stu_colleges]))
+
     if request.method == 'POST':
         if request.POST.get('multiAddCancel') or request.POST.get('first'): #click cancle button or first access
-            form = AdminForm()
+            form = AdminForm(initial = {'college' : userCollege})
         elif 'file' in request.POST and len(request.POST.get('file')) > 0:  # click confirm button
             fileTerms = re.split(',', request.POST.get('file'))
             for x in range(0, len(fileTerms) / LEN_OF_FACULTY_TABLE):
@@ -556,6 +587,7 @@ def adminAdd(request):
                 if state == 'YEAH'.encode('utf-8'):
                     dbQuery.save()
                     user = User.objects.create_user(dbQuery.id, dbQuery.id+"@zju.edu.cn", "123456")
+                    user.groups.add(group)
                 else:
                     errorExist = True
                     returnListItem = fileTerms[0 + LEN_OF_ADMIN_TABLE * x : LEN_OF_ADMIN_TABLE + LEN_OF_ADMIN_TABLE * x];
@@ -584,6 +616,7 @@ def adminAdd(request):
                 )
                 dbQuery.save()
                 user = User.objects.create_user(dbQuery.id, dbQuery.id+"@zju.edu.cn", "123456")
+                user.groups.add(group)
                 perm1 = Permission.objects.get(codename='student_manage')
                 perm2 = Permission.objects.get(codename='faculty_manage')
                 perm3 = Permission.objects.get(codename='course_manage')

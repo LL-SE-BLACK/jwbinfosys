@@ -41,7 +41,9 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'IMS',
     'dbtest',
-	'ACS',
+    'ACS',
+    'teacher',
+    'student',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -61,8 +63,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(os.path.dirname(__file__), 'templates').replace('\\','/'),
-                 os.path.join(os.path.dirname(__file__), '../templates').replace('\\','/'),
-                 os.path.join(os.path.dirname(__file__), '../ACS/templates').replace('\\','/'),
+                 os.path.join(os.path.dirname(__file__), '../teacher/template').replace('\\','/'),
+                  os.path.join(os.path.dirname(__file__), '../ACS/templates').replace('\\','/'),
                  ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -187,6 +189,8 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True
         },
+
+
     }
 }
 

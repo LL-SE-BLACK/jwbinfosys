@@ -87,6 +87,27 @@
                     <input type="checkbox" id="id_canManageFaculties" name="canManageFaculties"> Can Manage Faculties
                 </button>
             </div>
+
+            <div class="input-group">
+                <span class="input-group-addon"> College </span>
+                {% if isSuper %}
+                    <select id="id_college" name="college" class="form-control">
+                        {% for col in stu_colleges %}
+                            <option value="{{ col }}">{{ col }}</option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    {{ form.college }}
+                {% endif %}
+            </div>
+
+            <div class="input-group">
+                <span class="input-group-addon"> Gender </span>
+                <select id="id_gender" name="gender" class="form-control">
+                    <option value="M">男</option>
+                    <option value="F">女</option>
+                </select>
+            </div>
         </form>
 
         <form id="submit_csv" action="" method="post" enctype="multipart/form-data">
@@ -188,7 +209,8 @@
     {% for field in form %}
         var label = "{{ field.label }}";
         if (label=="Isspecial" || label=="Canmanagecourses"
-                || label=="Canmanagestudents" || label=="Canmanagefaculties" || label=="Photo") {
+                || label=="Canmanagestudents" || label=="Canmanagefaculties" || label=="Photo"
+                || label=="Gender" || label=="College") {
 
         }
         else {
@@ -201,8 +223,9 @@
         }
     {% endfor %}
 
+    //only super admin can change its college info field
     {% if not isSuper %}
-        $("#id_college").attr("readonly", "");
+        $("#id_college").attr({"class": "form-control", "readonly": ""});
     {% endif %}
 
     function toggleSpecialStatus() {

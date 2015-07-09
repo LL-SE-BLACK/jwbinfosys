@@ -10,7 +10,7 @@ class FacultyForm(forms.Form):
     id = forms.CharField(max_length=6, min_length=6)
     contact = forms.CharField(max_length=11)
     name = forms.CharField(max_length=20)
-    gender = forms.CharField(max_length=1)
+    gender = forms.BooleanField()
     college = forms.CharField(max_length=50)
     major = forms.CharField(max_length=50)
     degree = forms.CharField(max_length=20)
@@ -29,9 +29,10 @@ class FacultyForm(forms.Form):
 
     def clean_gender(self):
         addedFacultyGender = self.cleaned_data['gender']
-        if addedFacultyGender != 'M' and addedFacultyGender != 'F':
-            raise forms.ValidationError('Please input M or F')
-        return addedFacultyGender
+        if addedFacultyGender == 'M':
+            return True
+        else:
+            return False
 
 class FacultyFormModify(forms.Form):
     id = forms.CharField(max_length=6, min_length=6)
@@ -47,7 +48,7 @@ class StudentForm(forms.Form):
     id = forms.CharField(max_length=10, min_length=10)
     contact = forms.CharField(max_length=11)
     name = forms.CharField(max_length=20)
-    gender = forms.CharField(max_length=1)
+    gender = forms.BooleanField()
     college = forms.CharField(max_length=50)
     major = forms.CharField(max_length=50)
     grade = forms.IntegerField()
@@ -67,9 +68,10 @@ class StudentForm(forms.Form):
 
     def clean_gender(self):
         addedStudentGender = self.cleaned_data['gender']
-        if addedStudentGender != 'M' and addedStudentGender != 'F':
-            raise forms.ValidationError('Please input M or F')
-        return addedStudentGender
+        if addedStudentGender == 'M':
+            return True
+        else:
+            return False
 
 class StudentFormModify(forms.Form):
     id = forms.CharField(max_length=10, min_length=10)

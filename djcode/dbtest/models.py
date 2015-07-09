@@ -1,5 +1,5 @@
+# -*- coding: utf-8 -*-
 __author__ = 'skar'
-
 from IMS.models import *
 
 class TempTable(models.Model):
@@ -59,12 +59,12 @@ class User(models.Model):
 #This class should be get from group of "Choose course"
 class Scheme_info(models.Model):
     """
-    | class_id | course_id | state |
+    | class_id | id | state |
     |---|---|---|
     | CHARACTER(10) | CHARACTER(8) |  {-2,-1,0,1,2} |
     """
     student_id = models.ForeignKey(Student_user)
-    course_id = models.ForeignKey(Course_info,related_name='scheme_course')
+    id = models.ForeignKey(Course_info,related_name='scheme_course', primary_key=True)
     state = models.IntegerField(default=0)
     class Meta:
         ordering = ["student_id"]
