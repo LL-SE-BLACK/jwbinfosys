@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'John'
 
 from head import *
@@ -155,6 +156,10 @@ def facultyAdd(request):
     isSuper = False
     if userCollege == 'all':
         isSuper = True
+
+    #get all colleges from Student_user
+    stu_colleges = Student_user.objects.all()
+    stu_colleges = list(set([row.college for row in stu_colleges]))
 
     if request.method == 'POST':
         if request.POST.get('multiAddCancel') or request.POST.get('first'): #click cancle button or first access
@@ -346,12 +351,16 @@ def studentAdd(request):
     if Admin_user.objects.filter(id = request.user.username):
         userCollege = Admin_user.objects.filter(id = request.user.username)[0].college
     elif Faculty_user.objects.filter(id = request.user.username):
-        userCollege = Admin_user.objects.filter(id = request.user.username)[0].college
+        userCollege = Faculty_user.objects.filter(id = request.user.username)[0].college
     else:
         userCollege = Student_user.objects.filter(id = request.user.username)[0].college
     isSuper = False
     if userCollege == 'all':
         isSuper = True
+
+    #get all colleges from Student_user
+    stu_colleges = Student_user.objects.all()
+    stu_colleges = list(set([row.college for row in stu_colleges]))
 
     if request.method  ==   'POST':
         if request.POST.get('multiAddCancle') or request.POST.get('first'): #click cancle button or first access
@@ -546,9 +555,24 @@ def adminAdd(request):
     existed = []
     addIsDone = False
 
+    userCollege = ""
+    if Admin_user.objects.filter(id = request.user.username):
+        userCollege = Admin_user.objects.filter(id = request.user.username)[0].college
+    elif Faculty_user.objects.filter(id = request.user.username):
+        userCollege = Faculty_user.objects.filter(id = request.user.username)[0].college
+    else:
+        userCollege = Student_user.objects.filter(id = request.user.username)[0].college
+    isSuper = False
+    if userCollege == 'all':
+        isSuper = True
+
+    #get all colleges from Student_user
+    stu_colleges = Student_user.objects.all()
+    stu_colleges = list(set([row.college for row in stu_colleges]))
+
     if request.method == 'POST':
         if request.POST.get('multiAddCancel') or request.POST.get('first'): #click cancle button or first access
-            form = AdminForm()
+            form = AdminForm(initial = {'college' : userCollege})
         elif 'file' in request.POST and len(request.POST.get('file')) > 0:  # click confirm button
             fileTerms = re.split(',', request.POST.get('file'))
             for x in range(0, len(fileTerms) / LEN_OF_FACULTY_TABLE):

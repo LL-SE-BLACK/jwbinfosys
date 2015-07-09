@@ -135,7 +135,7 @@ def courseAdd(request):
     if request.method == 'POST':
         if request.POST.get('multiAddCancle') or request.POST.get('first'): #click cancle button or first access
             if isAdmin:
-                form = CourseForm()
+                form = CourseForm(initial={'college' : userInfo[0].college})
             if isFaculty:
                 facultyAdd = True
                 form = CourseFormFacultyAdd()

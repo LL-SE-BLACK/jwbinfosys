@@ -30,6 +30,19 @@ class LoginForm(forms.Form):
         return cleaned_data
 
 def startup(request):
+    if not Group.objects.filter(name='student'):
+        group = Group(name='student')
+        group.save()
+    if not Group.objects.filter(name='teacher'):
+        group = Group(name='teacher')
+        group.save()
+    if not Group.objects.filter(name='admin'):
+        group = Group(name='admin')
+        group.save()
+
+    local_path = os.path.dirname(__file__) #IMS/
+    if not os.path.exists(os.path.join(local_path, 'log')):
+        os.mkdir(os.path.join(local_path, 'log'))
     return HttpResponseRedirect('ims/login/')
 
 def loggingin(request):
